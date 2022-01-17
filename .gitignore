@@ -1,7 +1,10 @@
 .*
 *cache*
 
-API/**cache*
-SDA/**cache*
-data/**cache*
-flood/**cache*
+# API/**cache*
+# SDA/**cache*
+# data/**cache*
+# flood/**cache*
+
+*/**cache*
+*/.*
