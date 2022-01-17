@@ -1,3 +1,7 @@
 .*
 *cache*
 
+API/**cache*
+SDA/**cache*
+data/**cache*
+flood/**cache*
