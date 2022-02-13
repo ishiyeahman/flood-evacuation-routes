@@ -17,6 +17,7 @@ def get(LAT, LON):
     if jsonData: 
         elevation = jsonData["elevation"]
     else :
+        print("cant get data")
         elevation = None
         
     return elevation
