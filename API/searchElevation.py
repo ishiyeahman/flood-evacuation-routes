@@ -8,8 +8,8 @@ import elevation
 
 
 # """
-FILE = "/Volumes/GoogleDrive/マイドライブ/HI5/卒業研究/main/src/data/Tsuboi-4-chome/"
-WHERE = "Tsuboi-4-chome_Kumamotoshi"
+FILE = "/Volumes/GoogleDrive/マイドライブ/HI5/卒業研究/main/src/data/Shimoshiromoto/"
+WHERE = "Shimoshiromoto_Hitoyoshi"
 PATH = FILE + WHERE
 
 #get position of nodes

@@ -20,6 +20,7 @@ with open(f'{FILE}osm.csv') as f:
 # """
 s = sda.Algorithm(GRAPH, POS, source, target, LABEL)
 s.flood(DEPTH)
+
 s.main()
 
 s.plot(0.1, None)
