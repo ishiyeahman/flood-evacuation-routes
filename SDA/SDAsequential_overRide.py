@@ -22,7 +22,7 @@ class Agent:
         #adding
         self.route = [current]
         # self.score = 0
-        self.alpha = 0
+        self.cumulative_depth = 0
         
     def __repr__(self):
         return self.__class__.__name__ + pprint.pformat(self.__dict__)  
@@ -221,15 +221,21 @@ class Algorithm:
                 
                 if self.considerFlood:
                     # coding now
-                    p = self.distance(self.ss[i].nodeName)**2 * ( 1 + self.depth.get(self.ss[i].nodeName)*2 )
+                    safe_level = 0.5 # 1-0
+                    target_rate = 0.3 * safe_level
+                    rate = self.depth.get(self.ss[i].nodeName)*target_rate + 1
+                    p = self.distance(self.ss[i].nodeName) 
+                    self.ss[i].smellvalue =  1 / (self.a + self.b * p * rate ) 
+                    # self.ss[i].smellvalue = self.ss[i].smellvalue / ( 1 + self.depth.get(self.ss[i].nodeName))
                 else:
                     p = self.distance(self.ss[i].nodeName)
+                    self.ss[i].smellvalue =  1 / (self.a + self.b * p  ) 
                     
                 
-                # alpha = self.flood(self.ss[i])
-                # alpha = 1
-                # self.ss[i].smellvalue =  1 / (self.a + self.b * p)       
-                self.ss[i].smellvalue =  1 / (self.a + self.b * p  ) # /  (self.G[ self.agents[num].current][self.ss[i].nodeName ]['weight'])
+                # cumulative_depth = self.flood(self.ss[i])
+                # cumulative_depth = 1
+                # self.ss[i].smellvalue =  1 / (self.a + self.b * p)z
+                # /  (self.G[ self.agents[num].current][self.ss[i].nodeName ]['weight'])
                 
                 # self.ss[i].smellvalue =  ( 1 / (self.a + self.b * p) ) - self.G[ self.agents[num].current][self.ss[i].nodeName ]['weight']
                 # if self.ss[i].nodeName in self.adjacent:
@@ -241,7 +247,7 @@ class Algorithm:
                     self.ss[i].smellvalue = 0 
                     
                 # save data 
-                # self.ss[i].save(alpha)
+                # self.ss[i].save(cumulative_depth)
                 # self.ss[i].save(self.ss[i].setSmelValue)
                 
                 
@@ -251,11 +257,11 @@ class Algorithm:
         self.ss[next].visitorTotal = self.agents[num].total
         if self.considerFlood: 
             if len(list(self.G.neighbors(self.ss[next].nodeName))) > 2:
-                self.agents[num].alpha += ( self.depth.get(self.ss[next].nodeName) ) #** 5
-                print(self.agents[num].alpha)
+                self.agents[num].cumulative_depth += ( self.depth.get(self.ss[next].nodeName) ) #** 5
+                print(self.agents[num].cumulative_depth)
         
         self.agents[num].total += self.G[ self.agents[num].current][self.ss[next].nodeName ]['weight']
-        # self.agents[num].alpha += self.ss[next].data
+        # self.agents[num].cumulative_depth += self.ss[next].data
         self.agents[num].route.append(self.ss[next].nodeName)
     
         self.agents[num].current = self.ss[next].nodeName
@@ -308,12 +314,18 @@ class Algorithm:
         
 
         if self.considerFlood:
+            print("flood")
             sorted = self.safety()
         else:    
             sorted = self.sortAgent()
+    
             
         self.nodeColor('red', sorted[0].route)
         self.edgeColor('red', sorted[0].route)
+        # self.nodeColor('orange', sorted[1].route)
+        # self.edgeColor('orange', sorted[1].route)
+        # self.nodeColor('green', sorted[2].route)
+        # self.edgeColor('green', sorted[2].route)
 
         
         
@@ -326,7 +338,7 @@ class Algorithm:
     def select(self):
         # score
         for i in range(len(self.agents)):
-            self.agents[i].score = self.agents[i].total * ( 1 + self.agents[i].alpha)
+            self.agents[i].score = self.agents[i].total * ( 1 + self.agents[i].cumulative_depth)
             
     
         
@@ -367,6 +379,9 @@ class Algorithm:
                  if self.ss[i].nodeName == node and self.ss[i].nodeName != self.destination and self.ss[i].nodeName != self.source and self.ss[i].nodeName not in nearSource:
                     # self.ss[i].smellvalue = self.ss[i].smellvalue*(1-decrease*(1-self.ss[i].smellvalue))
                     self.ss[i].smellvalue = self.ss[i].smellvalue*(1-decrease)
+                    
+                    if self.considerFlood:
+                        self.ss[i].smellvalue = self.ss[i].smellvalue* (1 - decrease* (1 + self.depth.get(self.ss[i].nodeName)) )
                 
                     
     def getSmellSpot(self):
@@ -384,14 +399,20 @@ class Algorithm:
         return
     
     def safety(self):
-        safetyAgents = sorted(self.agents, key=lambda x: x.alpha)
-        print(safetyAgents[0])
+        safetyAgents = sorted(self.agents, key=lambda x: x.cumulative_depth)
+        
+        print("SAFE")
+        
         
         
         # for i in range(len(safetyAgents)):
         #     if safetyAgents[i].total == math.inf:    
                 
         safetyAgents = [ agent for agent in safetyAgents if agent.total  != math.inf]
+        
+        safetyAgents = sorted(safetyAgents, key=lambda x: (x.cumulative_depth / len(x.route) ) / ( 1 + x.total )) 
+    
+        print(safetyAgents)
         
         return  safetyAgents
     

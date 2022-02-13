@@ -6,12 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 import concurrent.futures as futures
 
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))  
-import API.depth as depth
+import depth
 
 
 # """
-FILE = "/Volumes/GoogleDrive/マイドライブ/HI5/卒業研究/venv/SDA/data/Shinyashiki-2-chome/"
-WHERE = "Shinyashiki-2-chome_Kumamotoshi"
+FILE = "/Volumes/GoogleDrive/マイドライブ/HI5/卒業研究/main/src/data/Tsuboi-4-chome/"
+WHERE = "Tsuboi-4-chome_Kumamotoshi"
 PATH = FILE + WHERE
 
 #get position of nodes
