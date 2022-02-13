@@ -99,6 +99,13 @@ class Algorithm:
     def distance(self, _from):
         return math.dist(self.pos[_from], self.pos[self.destination])
     
+    def distance3D(self, _from, next):
+        dest = self.elevation.get(next)
+        target = self.elevation.get(_from)
+        straight =  math.dist(self.pos[_from], self.pos[next])
+        # Pythagorean theorem
+        return math.sqrt(straight**2 + (dest - target)**2 )
+    
     
     def action(self, number):
         
@@ -221,49 +228,44 @@ class Algorithm:
     def setSmelValue(self, num, nbs):
         for i in nbs:
             if self.ss[i].visitor == 'none':
+                rate = 1
                 
                 if self.considerFlood:
-                    # coding now
+                    """ parameter of flood and subject """
                     safe_level = 0.5 # 1-0
                     target_rate = 0.3 * safe_level
                     rate = self.depth.get(self.ss[i].nodeName)*target_rate + 1
-                    p = self.distance(self.ss[i].nodeName) 
-                    self.ss[i].smellvalue =  1 / (self.a + self.b * p * rate ) 
-                    # self.ss[i].smellvalue = self.ss[i].smellvalue / ( 1 + self.depth.get(self.ss[i].nodeName))
+                           
                 else:
-                    p = self.distance(self.ss[i].nodeName)
-                    self.ss[i].smellvalue =  1 / (self.a + self.b * p  ) 
+                    if self.considerElevation:
+                        p = self.distance3D(self.ss[i].nodeName, self.destination) 
+                    else:
+                        p = self.distance(self.ss[i].nodeName)
                     
+                self.ss[i].smellvalue =  1 / (self.a + self.b * p * rate ) 
                 
-                # cumulative_depth = self.flood(self.ss[i])
-                # cumulative_depth = 1
-                # self.ss[i].smellvalue =  1 / (self.a + self.b * p)z
-                # /  (self.G[ self.agents[num].current][self.ss[i].nodeName ]['weight'])
-                
-                # self.ss[i].smellvalue =  ( 1 / (self.a + self.b * p) ) - self.G[ self.agents[num].current][self.ss[i].nodeName ]['weight']
-                # if self.ss[i].nodeName in self.adjacent:
-                #     self.ss[i].smellvalue = self.a - 1 / (self.G[self.destination][self.ss[i].nodeName ]['weight'] + self.G[ self.agents[num].current][self.ss[i].nodeName ]['weight'])
-                    
-                # if self.ss[i].nodeName == self.destination:
-                #     self.ss[i].smellvalue = self.a
                 if self.ss[i].nodeName == self.source:
                     self.ss[i].smellvalue = 0 
                     
-                # save data 
-                # self.ss[i].save(cumulative_depth)
-                # self.ss[i].save(self.ss[i].setSmelValue)
+                
                 
                 
     
     def move(self, num, next):
         #new struct
         self.ss[next].visitorTotal = self.agents[num].total
+        
         if self.considerFlood: 
             if len(list(self.G.neighbors(self.ss[next].nodeName))) > 2:
                 self.agents[num].cumulative_depth += ( self.depth.get(self.ss[next].nodeName) ) #** 5
-                print(self.agents[num].cumulative_depth)
+                # print(self.agents[num].cumulative_depth)
         
-        self.agents[num].total += self.G[ self.agents[num].current][self.ss[next].nodeName ]['weight']
+        if self.considerElevation:
+            #distance 3D:
+            self.agents[num].total += self.distance3D(self.agents[num].current, self.ss[next].nodeName )
+        else:
+            self.agents[num].total += self.G[ self.agents[num].current][self.ss[next].nodeName ]['weight'] 
+        
         # self.agents[num].cumulative_depth += self.ss[next].data
         self.agents[num].route.append(self.ss[next].nodeName)
     
@@ -321,6 +323,7 @@ class Algorithm:
             sorted = self.safety()
         else:    
             sorted = self.sortAgent()
+            print(sorted[0])
     
             
         self.nodeColor('red', sorted[0].route)
@@ -397,7 +400,7 @@ class Algorithm:
         
         # return 0
     
-    def flood(self, elevation):
+    def elevation(self, elevation):
         self.elevation = elevation
         self.considerEvelation = True
         

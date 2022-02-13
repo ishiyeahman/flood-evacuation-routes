@@ -3,10 +3,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import csv
 # import DepthView as dview
-from setting import GRAPH, POS, LABEL, DEPTH ,FILE
+from setting import GRAPH, POS, LABEL, DEPTH ,FILE, ELEVATION
 
 # -- smell detection agent based algorithm --
-import SDA.SDAsequential_overRide as sda
+import SDA.SDAsequantial_overRide_elevation as sda
 
 
 with open(f'{FILE}osm.csv') as f:
@@ -19,7 +19,8 @@ with open(f'{FILE}osm.csv') as f:
 # print(nodeLabel) 
 # """
 s = sda.Algorithm(GRAPH, POS, source, target, LABEL)
-s.flood(DEPTH)
+# s.flood(DEPTH)
+# s.elevation(ELEVATION)
 
 s.main()
 
