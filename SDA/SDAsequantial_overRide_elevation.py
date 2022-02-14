@@ -1,3 +1,4 @@
+from cv2 import SORT_ASCENDING
 import networkx as nx
 import matplotlib.pyplot as plt
 import math
@@ -145,7 +146,7 @@ class Algorithm:
                     # self.N_sda += 1
                     break
                 
-                self.setSmelValue(number, neighbors)
+                self.setSmellValue(number, neighbors)
                 next = self.nextSmellSpot(neighbors)
                 self.move(number, next)
                 
@@ -219,28 +220,29 @@ class Algorithm:
             if self.ss[i].nodeName == self.destination:
                 maxIndex = i
                 break
-            elif max < self.ss[i].smellvalue:
-                max = self.ss[i].smellvalue
+            elif max < self.ss[i].smellvalue  : #/  ( 1 +self.elevation.get(self.ss[i].nodeName)/10000):
+                max = self.ss[i].smellvalue # / ( 1 +self.elevation.get(self.ss[i].nodeName)/10000)
                 maxIndex = i
         return maxIndex 
     
     
-    def setSmelValue(self, num, nbs):
+    def setSmellValue(self, num, nbs):
         for i in nbs:
             if self.ss[i].visitor == 'none':
                 rate = 1
+                p = self.distance(self.ss[i].nodeName)
                 
                 if self.considerFlood:
                     """ parameter of flood and subject """
-                    safe_level = 0.5 # 1-0
+                    safe_level = 0.88# 1-0
                     target_rate = 0.3 * safe_level
                     rate = self.depth.get(self.ss[i].nodeName)*target_rate + 1
                            
-                else:
-                    if self.considerElevation:
-                        p = self.distance3D(self.ss[i].nodeName, self.destination) 
-                    else:
-                        p = self.distance(self.ss[i].nodeName)
+                if self.considerElevation:
+                    None
+                    # p = self.distance3D(self.ss[i].nodeName, self.destination) 
+                 
+                        
                     
                 self.ss[i].smellvalue =  1 / (self.a + self.b * p * rate ) 
                 
@@ -261,12 +263,13 @@ class Algorithm:
                 # print(self.agents[num].cumulative_depth)
         
         if self.considerElevation:
+            
             #distance 3D:
             self.agents[num].total += self.distance3D(self.agents[num].current, self.ss[next].nodeName )
         else:
             self.agents[num].total += self.G[ self.agents[num].current][self.ss[next].nodeName ]['weight'] 
         
-        # self.agents[num].cumulative_depth += self.ss[next].data
+        # self.agents[num].cumulative_depth += self.ss[next].dataself.considerElevation:
         self.agents[num].route.append(self.ss[next].nodeName)
     
         self.agents[num].current = self.ss[next].nodeName
@@ -323,6 +326,7 @@ class Algorithm:
             sorted = self.safety()
         else:    
             sorted = self.sortAgent()
+            print(len(sorted))
             print(sorted[0])
     
             
@@ -363,7 +367,9 @@ class Algorithm:
         print(target.route)
         
     def sortAgent(self):
-        return sorted(self.agents, key=lambda x: x.total)
+        srt = sorted(self.agents, key=lambda x: x.total)
+        srt = [ agent for agent in srt if agent.total  != math.inf]
+        return srt
     
     def nodeColor(self, color, nodes):
         graph = list(self.G.nodes())
@@ -402,7 +408,7 @@ class Algorithm:
     
     def elevation(self, elevation):
         self.elevation = elevation
-        self.considerEvelation = True
+        self.considerElevation = True
         
         # return 0
     
